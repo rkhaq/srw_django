@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j48k-aoc(vcnvj!-&w3$5ti*pd=0#y&v2#0!gnk!j0u4ydt6&k'
+load_dotenv()
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -137,3 +139,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Replace with your Next.js frontend domain
 ]
+
+#Configure heroku
+import dj_database_url
+DATABASES = {
+    'default': dj_database_url.config(conn_max_age=600)
+}
+
+# Use a static root directory for production
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Ensure the 'ALLOWED_HOSTS' setting includes the Heroku app's domain
+ALLOWED_HOSTS = ['srw-django.herokuapp.com']
