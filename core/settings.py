@@ -25,9 +25,10 @@ load_dotenv()
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG') == 'True'
 
-ALLOWED_HOSTS = []
+# Ensure the 'ALLOWED_HOSTS' setting includes the Heroku app's domain
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'srw-django.herokuapp.com',]
 
 
 # Application definition
@@ -125,12 +126,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-if DEBUG:
-    STATIC_URL = 'static/'
 
-    STATICFILES_DIRS = [
-        os.path.join(BASE_DIR, 'static'),
-    ]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -143,38 +140,32 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 #Configure heroku
-import dj_database_url
-DATABASES = {
-    'default': dj_database_url.config(conn_max_age=600)
-}
+# import dj_database_url
+# DATABASES = {
+#     'default': dj_database_url.config(conn_max_age=600)
+# }
+
+
+# Configure Amazon S3
+if DEBUG:
+    STATIC_URL = 'static/'
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    from core.cdn.conf import (
+        AWS_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY,
+        AWS_STORAGE_BUCKET_NAME,
+        AWS_S3_REGION_NAME,
+        AWS_S3_CUSTOM_DOMAIN,
+        AWS_DEFAULT_ACL,
+        AWS_S3_OBJECT_PARAMETERS,
+        DEFAULT_FILE_STORAGE,
+        STATICFILES_STORAGE,
+    )
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Use a static root directory for production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-# Ensure the 'ALLOWED_HOSTS' setting includes the Heroku app's domain
-ALLOWED_HOSTS = ['srw-django.herokuapp.com']
-
-# Configure Amazon S3
-
-# Use Amazon S3 for storage for uploaded media files.
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-# Use Amazon S3 for static files storage.
-STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'
-
-# Amazon S3 settings
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')  # replace with your chosen region
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-AWS_DEFAULT_ACL = 'public-read'
-
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
-
-# Configure media file storage settings (optional, if you have media files)
-MEDIA_LOCATION = 'media'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'

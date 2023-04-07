@@ -1,4 +1,7 @@
 import os
+import io
+from django.conf import settings
+from django.core.files.storage import default_storage
 import uuid
 import matplotlib
 import matplotlib.pyplot as plt
@@ -114,10 +117,18 @@ def plot_wall(**kwargs):
 
     # Save the plot as an image
     image_name = f"wall_plot_{uuid.uuid4().hex}.png"
-    image_path = os.path.join('static', 'generated_images', image_name)  # Adjust the path as needed based on your project structure.
-    fig.savefig(image_path, dpi=300, bbox_inches='tight')
+
+    if settings.DEBUG:
+        image_path = os.path.join('media', 'generated_images', image_name)  # Adjust the path as needed based on your project structure.
+        fig.savefig(image_path, dpi=300, bbox_inches='tight')
+        image_url = os.path.join(settings.STATIC_URL, 'generated_images', image_name)
+    else:
+        image_path = os.path.join('generated_images', image_name)
+        with default_storage.open(image_path, 'wb') as image_file:
+            fig.savefig(image_file, dpi=300, bbox_inches='tight')
+        image_url = default_storage.url(image_path)
 
     # Close the figure to prevent memory leaks
     plt.close(fig)
 
-    return image_path
+    return image_url
