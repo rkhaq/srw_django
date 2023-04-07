@@ -1,7 +1,11 @@
 import os
+import base64
 import io
+
 from django.conf import settings
 from django.core.files.storage import default_storage
+from django.core.cache import cache
+
 import uuid
 import matplotlib
 import matplotlib.pyplot as plt
@@ -115,20 +119,19 @@ def plot_wall(**kwargs):
     ax.set_title("Retaining Wall, Soil, and Forces")
     ax.set_aspect("equal")
 
-    # Save the plot as an image
-    image_name = f"wall_plot_{uuid.uuid4().hex}.png"
-
-    if settings.DEBUG:
-        image_path = os.path.join('media', 'generated_images', image_name)  # Adjust the path as needed based on your project structure.
-        fig.savefig(image_path, dpi=300, bbox_inches='tight')
-        image_url = os.path.join(settings.STATIC_URL, 'generated_images', image_name)
-    else:
-        image_path = os.path.join('generated_images', image_name)
-        with default_storage.open(image_path, 'wb') as image_file:
-            fig.savefig(image_file, dpi=300, bbox_inches='tight')
-        image_url = default_storage.url(image_path)
+    # Save the plot as an image in cache
+    # Create a buffer to save the image data
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format='png', dpi=300, bbox_inches='tight')
+    buffer.seek(0)
 
     # Close the figure to prevent memory leaks
     plt.close(fig)
 
-    return image_url
+    # Generate a unique cache key and store the image data in the cache
+    cache_key = f"wall_plot_{uuid.uuid4().hex}"
+    image_data = base64.b64encode(buffer.getvalue()).decode()
+    cache.set(cache_key, image_data, timeout=1000)  # Set a timeout, e.g., 5 minutes (300 seconds)
+
+    return cache_key
+

@@ -169,3 +169,14 @@ STATICFILES_DIRS = [
 
 # Use a static root directory for production
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+#Caching
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",  # Update the location according to your Redis configuration
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
