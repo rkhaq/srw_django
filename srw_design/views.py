@@ -28,3 +28,6 @@ def get_wall_image(request, cache_key):
         return JsonResponse({'image_data': image_data})
     else:
         return JsonResponse({'error': 'Image not found or expired'}, status=404) 
+    
+def hello_api(request):
+    return JsonResponse({'message': 'hello'})
