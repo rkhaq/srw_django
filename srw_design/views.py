@@ -8,9 +8,15 @@ from .serializers import RetainingWallSerializer
 from .utils.stability_check import stability_check
 from .utils.plotters import plot_wall
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class RetainingWallAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
+        logger.info("Received request data: %s", request.data)
+
         serializer = RetainingWallSerializer(data=request.data)
         if serializer.is_valid():
             wall_properties = serializer.data
@@ -19,6 +25,7 @@ class RetainingWallAPIView(APIView):
 
             return Response({'plote_cache_key': plot_cache_key, 'stability_results': stability_results})
 
+        logger.error("Serializer errors: %s", serializer.errors)
         return Response(serializer.errors, status=400)
 
 def get_wall_image(request, cache_key):
