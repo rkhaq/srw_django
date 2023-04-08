@@ -174,7 +174,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis:6379/1",  # Update the location according to your Redis configuration
+        "LOCATION": os.environ.get("REDISCLOUD_URL", "redis://localhost:6379"),  # Update the location according to your Redis configuration
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
