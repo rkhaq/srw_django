@@ -139,11 +139,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Replace with your Next.js frontend domain
 ]
 
-#Configure heroku
-# import dj_database_url
-# DATABASES = {
-#     'default': dj_database_url.config(conn_max_age=600)
-# }
+# Configure heroku
+import dj_database_url
+DATABASES = {
+    'default': dj_database_url.config(conn_max_age=600)
+}
 
 
 # Configure Amazon S3
@@ -174,7 +174,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",  # Update the location according to your Redis configuration
+        "LOCATION": "redis://redis:6379/1",  # Update the location according to your Redis configuration
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
